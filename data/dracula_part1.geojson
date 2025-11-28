@@ -2986,35 +2986,6 @@
         "sequence_in_book": 99,
         "content": "_Dr. Seward’s Diary._\n\n_17 September._--I was engaged after dinner in my study posting up my\nbooks, which, through press of other work and the many visits to Lucy,\nhad fallen sadly into arrear. Suddenly the door was burst open, and in\nrushed my patient, with his face distorted with passion. I was\nthunderstruck, for such a thing as a patient getting of his own accord\ninto the Superintendent’s study is almost unknown. Without an instant’s\npause he made straight at me. He had a dinner-knife in his hand, and,\nas I saw he was dangerous, I tried to keep the table between us. He was\ntoo quick and too strong for me, however; for before I could get my\nbalance he had struck at me and cut my left wrist rather severely.\nBefore he could strike again, however, I got in my right and he was\nsprawling on his back on the floor. My wrist bled freely, and quite a\nlittle pool trickled on to the carpet. I saw that my friend was not\nintent on further effort, and occupied myself binding up my wrist,\nkeeping a wary eye on the prostrate figure all the time. When the\nattendants rushed in, and we turned our attention to him, his employment\npositively sickened me. He was lying on his belly on the floor licking\nup, like a dog, the blood which had fallen from my wounded wrist. He was\neasily secured, and, to my surprise, went with the attendants quite\nplacidly, simply repeating over and over again: “The blood is the life!\nThe blood is the life!”\n\nI cannot afford to lose blood just at present; I have lost too much of\nlate for my physical good, and then the prolonged strain of Lucy’s\nillness and its horrible phases is telling on me. I am over-excited and\nweary, and I need rest, rest, rest. Happily Van Helsing has not summoned\nme, so I need not forego my sleep; to-night I could not well do without\nit."
       }
-    },
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          4.3997081,
-          51.2211097
-        ]
-      },
-      "properties": {
-        "entry_id": "entry_008_18",
-        "master_entry_id": "entry_008",
-        "sub_entry_index": 18,
-        "chapter_num": 6,
-        "chapter_title": "",
-        "entry_type": "letter",
-        "author": "Dr. Seward",
-        "recipient": null,
-        "date_raw": "17 September.",
-        "date_normalized": "1892-09-17",
-        "year": 1892,
-        "location_name": "Antwerp",
-        "location_type": "geocoded",
-        "country": null,
-        "time_of_day": null,
-        "sequence_in_book": 100,
-        "content": "_Telegram, Van Helsing, Antwerp, to Seward, Carfax._\n\n(Sent to Carfax, Sussex, as no county given; delivered late by\ntwenty-two hours.)\n\n“_17 September._--Do not fail to be at Hillingham to-night. If not\nwatching all the time frequently, visit and see that flowers are as\nplaced; very important; do not fail. Shall be with you as soon as\npossible after arrival.”"
-      }
     }
   ]
 }
