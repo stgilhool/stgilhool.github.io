@@ -300,16 +300,18 @@
         }
 
         function createPopupContent(props) {
-            return `
-                <div class="popup-title">${getTitle(props)}</div>
-                <div class="popup-date">${getDate(props)}</div>
-                <div class="popup-content">${truncateContent(props.content)}</div>
-            `;
+            return `<div style="color: #f0f0f0; font-size: 1em;">${formatDisplayText(props)}</div>`;
         }
 
         // Create map objects from features (but don't add to map yet)
         function createMapObject(feature, index) {
             const geom = feature.geometry;
+
+            // Skip features with null geometry
+            if (!geom || geom.type === null) {
+                return null;
+            }
+
             const props = feature.properties;
             const popupContent = createPopupContent(props);
 
@@ -467,25 +469,25 @@
                 }
             });
 
-            // Add only the current map object to map
+            // Add only the current map object to map (if it exists)
             const currentObj = mapObjects[currentIndex];
             if (currentObj) {
                 currentObj.layer.addTo(map);
                 if (currentObj.decorator) {
                     currentObj.decorator.addTo(map);
                 }
-            }
 
-            // Pan to current feature
-            const feature = features[currentIndex];
-            const geom = feature.geometry;
+                // Pan to current feature only if geometry exists
+                const feature = features[currentIndex];
+                const geom = feature.geometry;
 
-            if (geom.type === 'Point') {
-                const coords = geom.coordinates;
-                map.flyTo([coords[1], coords[0]], 6, { duration: 1 });
-            } else if (geom.type === 'LineString') {
-                const bounds = currentObj.layer.getBounds();
-                map.flyToBounds(bounds, { duration: 1, padding: [50, 50] });
+                if (geom && geom.type === 'Point') {
+                    const coords = geom.coordinates;
+                    map.flyTo([coords[1], coords[0]], 6, { duration: 1 });
+                } else if (geom && geom.type === 'LineString') {
+                    const bounds = currentObj.layer.getBounds();
+                    map.flyToBounds(bounds, { duration: 1, padding: [50, 50] });
+                }
             }
         }
 
@@ -500,8 +502,8 @@
             const content = props.content || 'No content available.';
             contentElement.innerHTML = convertItalics(content);
 
-            // Open popup on the current map object
-            if (mapObjects[currentIndex]) {
+            // Open popup on the current map object (if it exists and has geometry)
+            if (mapObjects[currentIndex] && feature.geometry) {
                 mapObjects[currentIndex].layer.openPopup();
             }
         }
