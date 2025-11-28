@@ -200,208 +200,6 @@
             crossorigin=""></script>
     
     <script>
-        // GeoJSON data with time-based features and content
-        const draculaData = {
-            "type": "FeatureCollection",
-            "features": [
-                {
-                    "type": "Feature",
-                    "properties": {
-                        "title": "Jonathan Harker's Journey Begins",
-                        "date": "1893-05-03",
-                        "time": 1,
-                        "content": "Jonathan Harker, a young English solicitor, departs from Munich on his journey to Transylvania. He is traveling to meet Count Dracula at his castle to assist with the purchase of property in England. His journal begins with notes about the strange customs and superstitions of the local people."
-                    },
-                    "geometry": {
-                        "type": "Point",
-                        "coordinates": [11.5820, 48.1351]
-                    }
-                },
-                {
-                    "type": "Feature",
-                    "properties": {
-                        "title": "Arrival in Bistritz",
-                        "date": "1893-05-03",
-                        "time": 2,
-                        "content": "Harker arrives in Bistritz and stays at the Golden Krone Hotel. The landlady becomes distressed upon learning of his destination and gives him a crucifix for protection. Fellow travelers make the sign of the cross and point two fingers at him as a charm against the evil eye."
-                    },
-                    "geometry": {
-                        "type": "Point",
-                        "coordinates": [24.5000, 47.1333]
-                    }
-                },
-                {
-                    "type": "Feature",
-                    "properties": {
-                        "title": "The Borgo Pass",
-                        "date": "1893-05-04",
-                        "time": 3,
-                        "content": "At the Borgo Pass, Harker is met by a mysterious driver sent by Count Dracula. The coach is pulled by coal-black horses, and the driver has remarkable strength. Wolves howl in the distance as they travel through the Carpathian Mountains toward the castle."
-                    },
-                    "geometry": {
-                        "type": "Point",
-                        "coordinates": [25.3500, 47.2500]
-                    }
-                },
-                {
-                    "type": "Feature",
-                    "properties": {
-                        "title": "Castle Dracula",
-                        "date": "1893-05-05",
-                        "time": 4,
-                        "content": "Jonathan Harker arrives at Castle Dracula, a vast ruined castle perched on the edge of a precipice. Count Dracula welcomes him with old-world courtesy: 'Welcome to my house! Enter freely and of your own will!' The Count is tall, dressed entirely in black, with peculiar sharp white teeth and hairy palms."
-                    },
-                    "geometry": {
-                        "type": "Point",
-                        "coordinates": [25.3717, 47.3531]
-                    }
-                },
-                {
-                    "type": "Feature",
-                    "properties": {
-                        "title": "Prisoner in the Castle",
-                        "date": "1893-05-12",
-                        "time": 5,
-                        "content": "Harker realizes he is a prisoner. All doors are locked, and there are no servants. The Count discusses English real estate and practices English pronunciation. Harker notices the Count casts no reflection in his shaving mirror. He discovers he cannot escape – every window overlooks a sheer precipice."
-                    },
-                    "geometry": {
-                        "type": "Point",
-                        "coordinates": [25.3717, 47.3531]
-                    }
-                },
-                {
-                    "type": "Feature",
-                    "properties": {
-                        "title": "The Demeter Sets Sail",
-                        "date": "1893-07-06",
-                        "time": 6,
-                        "content": "The Russian schooner Demeter departs Varna, carrying fifty boxes of earth destined for Carfax Abbey in England. Among the cargo is Count Dracula himself, hidden in one of the boxes. The crew is unaware of the horror that accompanies them on their voyage."
-                    },
-                    "geometry": {
-                        "type": "Point",
-                        "coordinates": [27.9147, 43.2141]
-                    }
-                },
-                {
-                    "type": "Feature",
-                    "properties": {
-                        "title": "The Demeter Wrecks at Whitby",
-                        "date": "1893-08-08",
-                        "time": 7,
-                        "content": "A violent storm drives the Demeter ashore at Whitby. The ship crashes into the harbor, its dead captain lashed to the helm. A large dog leaps from the deck and runs up the cliff toward the church – it is Dracula in wolf form. The ship's log tells of crew members vanishing one by one during the voyage."
-                    },
-                    "geometry": {
-                        "type": "Point",
-                        "coordinates": [-0.6206, 54.4862]
-                    }
-                },
-                {
-                    "type": "Feature",
-                    "properties": {
-                        "title": "Lucy's Sleepwalking",
-                        "date": "1893-08-11",
-                        "time": 8,
-                        "content": "Lucy Westenra begins sleepwalking in Whitby, where she is staying with her friend Mina Murray. Mina finds Lucy in the churchyard at night, with a dark figure bending over her. Lucy's health begins to decline mysteriously, with two small puncture marks appearing on her throat."
-                    },
-                    "geometry": {
-                        "type": "Point",
-                        "coordinates": [-0.6132, 54.4871]
-                    }
-                },
-                {
-                    "type": "Feature",
-                    "properties": {
-                        "title": "Van Helsing Arrives in London",
-                        "date": "1893-09-02",
-                        "time": 9,
-                        "content": "Dr. Abraham Van Helsing, a professor from Amsterdam and expert in obscure diseases, arrives in London at the request of Dr. Seward. He examines Lucy and recognizes the marks on her throat. He orders garlic flowers placed around her room and a crucifix around her neck, though he does not yet reveal his suspicions."
-                    },
-                    "geometry": {
-                        "type": "Point",
-                        "coordinates": [-0.1276, 51.5074]
-                    }
-                },
-                {
-                    "type": "Feature",
-                    "properties": {
-                        "title": "Death and Undeath of Lucy",
-                        "date": "1893-09-20",
-                        "time": 10,
-                        "content": "Despite blood transfusions from her suitors, Lucy dies – only to return as a vampire. Reports surface of a 'beautiful lady' luring children on Hampstead Heath. Van Helsing leads Arthur Holmwood, Dr. Seward, and Quincey Morris to Lucy's tomb, where they witness her undead state. Arthur drives a stake through her heart, granting her true death."
-                    },
-                    "geometry": {
-                        "type": "Point",
-                        "coordinates": [-0.1636, 51.5615]
-                    }
-                },
-                {
-                    "type": "Feature",
-                    "properties": {
-                        "title": "Carfax Abbey Investigation",
-                        "date": "1893-10-01",
-                        "time": 11,
-                        "content": "The vampire hunters investigate Carfax Abbey, the property Dracula purchased through Jonathan Harker. They discover it filled with earth-boxes from Transylvania and swarms of rats. Van Helsing explains that Dracula must rest in his native soil. They begin the task of sterilizing the boxes with sacred wafers."
-                    },
-                    "geometry": {
-                        "type": "Point",
-                        "coordinates": [-0.0506, 51.5029]
-                    }
-                },
-                {
-                    "type": "Feature",
-                    "properties": {
-                        "title": "Mina's Contamination",
-                        "date": "1893-10-03",
-                        "time": 12,
-                        "content": "While the men hunt for Dracula's earth-boxes, the Count attacks Mina Harker at the asylum. He forces her to drink his blood, creating a psychic link between them. A scar from a sacred wafer appears on her forehead. Van Helsing realizes they can use this connection to track Dracula."
-                    },
-                    "geometry": {
-                        "type": "Point",
-                        "coordinates": [-0.0762, 51.5085]
-                    }
-                },
-                {
-                    "type": "Feature",
-                    "properties": {
-                        "title": "Dracula Flees England",
-                        "date": "1893-10-04",
-                        "time": 13,
-                        "content": "With most of his earth-boxes destroyed, Dracula flees London aboard the ship Czarina Catherine, bound for Varna. The hunters realize he is returning to Transylvania to escape them. They prepare to pursue him, knowing they must destroy him before the curse on Mina becomes permanent."
-                    },
-                    "geometry": {
-                        "type": "Point",
-                        "coordinates": [-0.0553, 51.5045]
-                    }
-                },
-                {
-                    "type": "Feature",
-                    "properties": {
-                        "title": "The Chase Through Europe",
-                        "date": "1893-10-15",
-                        "time": 14,
-                        "content": "The vampire hunters travel across Europe in pursuit of Dracula. They take trains through France and Eastern Europe, racing against time. Van Helsing uses hypnosis on Mina to track Dracula's movements through their psychic link. The Count's ship is spotted heading up the Danube."
-                    },
-                    "geometry": {
-                        "type": "Point",
-                        "coordinates": [26.1025, 44.4268]
-                    }
-                },
-                {
-                    "type": "Feature",
-                    "properties": {
-                        "title": "Final Confrontation",
-                        "date": "1893-11-06",
-                        "time": 15,
-                        "content": "The hunters intercept Dracula's coffin as it is being transported to Castle Dracula by gypsies. As the sun sets, Jonathan Harker slashes Dracula's throat with a kukri knife while Quincey Morris plunges a bowie knife into his heart. The Count crumbles to dust before their eyes. Morris dies from wounds received in the fight, and Mina's curse is lifted."
-                    },
-                    "geometry": {
-                        "type": "Point",
-                        "coordinates": [25.3717, 47.3531]
-                    }
-                }
-            ]
-        };
-
         // Initialize the map centered on Europe
         const map = L.map('map').setView([48.0, 15.0], 4);
 
@@ -428,44 +226,95 @@
         });
 
         // Store markers and features
-        const markers = [];
-        const features = [...draculaData.features].sort((a, b) => a.properties.time - b.properties.time);
+        let markers = [];
+        let features = [];
         let currentIndex = 0;
         let isPlaying = false;
         let playInterval = null;
 
-        // Create markers for all features
-        features.forEach((feature, index) => {
-            const coords = feature.geometry.coordinates;
-            const props = feature.properties;
-            
-            const marker = L.marker([coords[1], coords[0]], { icon: draculaIcon }).addTo(map);
-            
-            const popupContent = `
-                <div class="popup-title">${props.title}</div>
-                <div class="popup-date">${props.date}</div>
-                <div class="popup-content">${props.content}</div>
-            `;
-            
-            marker.bindPopup(popupContent, { maxWidth: 300 });
-            
-            marker.on('click', () => {
-                currentIndex = index;
-                updateTimelineUI();
-                displayContent(feature);
-            });
-            
-            markers.push(marker);
-        });
+        // Helper function to get display title from feature properties
+        function getTitle(props) {
+            // Check for non-empty chapter_title first
+            if (props.chapter_title && props.chapter_title.trim()) {
+                return props.chapter_title;
+            }
+            // Use entry_type and author combination
+            if (props.entry_type && props.author) {
+                return `${props.entry_type} - ${props.author}`;
+            }
+            if (props.entry_type) {
+                return props.entry_type;
+            }
+            return `Entry ${props.sequence_in_book || props.entry_id || ''}`;
+        }
 
-        // Set up the timeline slider
+        // Helper function to get display date from feature properties
+        function getDate(props) {
+            return props.date_normalized || props.date_raw || '';
+        }
+
+        // Helper function to truncate content for popup
+        function truncateContent(content, maxLength = 300) {
+            if (!content) return '';
+            if (content.length <= maxLength) return content;
+            return content.substring(0, maxLength) + '...';
+        }
+
+        // Load GeoJSON data from external file
+        fetch('data/dracula_part1.geojson')
+            .then(response => response.json())
+            .then(data => {
+                // Sort features by sequence_in_book
+                features = [...data.features].sort((a, b) => 
+                    (a.properties.sequence_in_book || 0) - (b.properties.sequence_in_book || 0)
+                );
+
+                // Create markers for all features
+                features.forEach((feature, index) => {
+                    const coords = feature.geometry.coordinates;
+                    const props = feature.properties;
+                    
+                    const marker = L.marker([coords[1], coords[0]], { icon: draculaIcon }).addTo(map);
+                    
+                    const popupContent = `
+                        <div class="popup-title">${getTitle(props)}</div>
+                        <div class="popup-date">${getDate(props)}</div>
+                        <div class="popup-content">${truncateContent(props.content)}</div>
+                    `;
+                    
+                    marker.bindPopup(popupContent, { maxWidth: 350 });
+                    
+                    marker.on('click', () => {
+                        currentIndex = index;
+                        updateTimelineUI();
+                        displayContent(feature);
+                    });
+                    
+                    markers.push(marker);
+                });
+
+                // Set up the timeline slider
+                const slider = document.getElementById('time-slider');
+                slider.max = features.length - 1;
+                
+                // Initialize with first feature
+                updateTimelineUI();
+                displayContent(features[0]);
+            })
+            .catch(error => {
+                console.error('Error loading GeoJSON:', error);
+                document.getElementById('content-text').textContent = 'Error loading data. Please try again later.';
+            });
+
+        // Set up event listeners
         const slider = document.getElementById('time-slider');
-        slider.max = features.length - 1;
         
         slider.addEventListener('input', (e) => {
             currentIndex = parseInt(e.target.value);
             updateTimelineUI();
-            displayContent(features[currentIndex]);
+            if (features[currentIndex]) {
+                displayContent(features[currentIndex]);
+            }
         });
 
         // Navigation buttons
@@ -517,6 +366,8 @@
         }
 
         function updateTimelineUI() {
+            if (features.length === 0) return;
+            
             slider.value = currentIndex;
             
             // Update button states
@@ -539,18 +390,17 @@
 
         function displayContent(feature) {
             const props = feature.properties;
-            document.getElementById('current-date').textContent = `${props.date} - ${props.title}`;
-            document.getElementById('content-text').textContent = props.content;
+            const title = getTitle(props);
+            const date = getDate(props);
+            
+            document.getElementById('current-date').textContent = date ? `${date} - ${title}` : title;
+            document.getElementById('content-text').textContent = props.content || 'No content available.';
             
             // Open popup on the marker
-            markers[currentIndex].openPopup();
+            if (markers[currentIndex]) {
+                markers[currentIndex].openPopup();
+            }
         }
-
-        // Initialize with first feature
-        setTimeout(() => {
-            updateTimelineUI();
-            displayContent(features[0]);
-        }, 500);
     </script>
 </body>
 </html>
