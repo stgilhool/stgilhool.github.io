@@ -429,7 +429,7 @@
 
         // Store markers and features
         const markers = [];
-        const features = draculaData.features.sort((a, b) => a.properties.time - b.properties.time);
+        const features = [...draculaData.features].sort((a, b) => a.properties.time - b.properties.time);
         let currentIndex = 0;
         let isPlaying = false;
         let playInterval = null;
