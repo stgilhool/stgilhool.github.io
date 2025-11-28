@@ -401,12 +401,11 @@
                     return (a.properties.sequence_in_book || 0) - (b.properties.sequence_in_book || 0);
                 });
 
-                // Create map objects for all features
+                // Create map objects for all features (keep indices aligned with features array)
                 features.forEach((feature, index) => {
                     const obj = createMapObject(feature, index);
-                    if (obj) {
-                        mapObjects.push(obj);
-                    }
+                    // Always push to keep array indices aligned, even if null
+                    mapObjects.push(obj);
                 });
 
                 // Set up the timeline slider
@@ -461,17 +460,17 @@
 
             // Remove all map objects from map
             mapObjects.forEach((obj) => {
-                if (map.hasLayer(obj.layer)) {
+                if (obj && map.hasLayer(obj.layer)) {
                     map.removeLayer(obj.layer);
                 }
-                if (obj.decorator && map.hasLayer(obj.decorator)) {
+                if (obj && obj.decorator && map.hasLayer(obj.decorator)) {
                     map.removeLayer(obj.decorator);
                 }
             });
 
-            // Add only the current map object to map (if it exists)
+            // Add only the current map object to map (if it exists and is not null)
             const currentObj = mapObjects[currentIndex];
-            if (currentObj) {
+            if (currentObj && currentObj !== null) {
                 currentObj.layer.addTo(map);
                 if (currentObj.decorator) {
                     currentObj.decorator.addTo(map);
