@@ -10,10 +10,6 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 
-    <!-- Leaflet Timeline CSS -->
-    <link rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/leaflet-timeline-slider@1.0.1/src/leaflet.timelineSlider.min.css" />
-
     <style>
         * {
             margin: 0;
@@ -60,7 +56,7 @@
             background-color: #2a2a2a;
             padding: 20px;
             border-top: 2px solid #8b0000;
-            max-height: 200px;
+            max-height: 400px;
             overflow-y: auto;
         }
 
@@ -163,6 +159,28 @@
             font-size: 0.9em;
             text-align: center;
         }
+
+        /* Ant path animation for LineStrings */
+        @keyframes ant-path {
+            to {
+                stroke-dashoffset: -20;
+            }
+        }
+
+        .ant-path-line {
+            stroke-dasharray: 10, 10;
+            animation: ant-path 1s linear infinite;
+        }
+
+        .ant-path-line-active {
+            stroke-dasharray: 10, 10;
+            animation: ant-path 0.5s linear infinite;
+        }
+
+        /* Arrow decoration styles */
+        .leaflet-interactive[class*="arrow-decorator"] {
+            pointer-events: none;
+        }
     </style>
 </head>
 
@@ -180,19 +198,17 @@
         <div id="map"></div>
 
         <div class="time-slider-container">
-            <label class="time-slider-label">Timeline Navigation</label>
-            <input type="range" id="time-slider" min="0" max="100" value="0" />
+            <span class="time-slider-label">Timeline</span>
+            <input type="range" id="time-slider" min="0" max="100" value="0" step="1">
             <div class="time-controls">
-                <button id="prev-btn">← Previous</button>
-                <button id="play-btn">▶ Play</button>
-                <button id="next-btn">Next →</button>
-                <span id="current-date">Select an event</span>
+                <button id="prev-btn">⏮ Previous</button>
+                <button id="next-btn">Next ⏭</button>
+                <span id="current-date">Loading...</span>
             </div>
         </div>
 
         <div id="content-panel">
-            <h3>📜 Event Details</h3>
-            <p id="content-text">Use the timeline slider or click on a marker to view event content.</p>
+            <div id="content-text">Select an entry from the timeline to view its content.</div>
         </div>
     </div>
 
@@ -200,18 +216,20 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
+    <!-- Polyline Decorator for arrows -->
+    <script src="https://unpkg.com/leaflet-polylinedecorator@1.6.0/dist/leaflet.polylineDecorator.js"></script>
+
     <script>
-        // Initialize the map centered on Europe
+        // Initialize map
         const map = L.map('map').setView([48.0, 15.0], 4);
 
-        // Add dark-themed tile layer
+        // Add dark tile layer
         L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-            subdomains: 'abcd',
             maxZoom: 19
         }).addTo(map);
 
-        // Custom marker icon
+        // Custom marker icons
         const draculaIcon = L.divIcon({
             className: 'custom-marker',
             html: '<div style="background-color: #8b0000; width: 12px; height: 12px; border-radius: 50%; border: 2px solid #c41e3a; box-shadow: 0 0 10px rgba(139, 0, 0, 0.8);"></div>',
@@ -226,20 +244,16 @@
             iconAnchor: [12, 12]
         });
 
-        // Store markers and features
-        let markers = [];
+        // Store features and map objects
         let features = [];
+        let mapObjects = []; // Will store { type: 'marker'|'line', layer: ..., decorator: ... }
         let currentIndex = 0;
-        let isPlaying = false;
-        let playInterval = null;
 
-        // Helper function to get display title from feature properties
+        // Helper functions
         function getTitle(props) {
-            // Check for non-empty chapter_title first
             if (props.chapter_title && props.chapter_title.trim()) {
                 return props.chapter_title;
             }
-            // Use entry_type and author combination
             if (props.entry_type && props.author) {
                 return `${props.entry_type} - ${props.author}`;
             }
@@ -249,49 +263,149 @@
             return `Entry ${props.sequence_in_book || props.entry_id || ''}`;
         }
 
-        // Helper function to get display date from feature properties
         function getDate(props) {
             return props.date_normalized || props.date_raw || '';
         }
 
-        // Helper function to truncate content for popup
-        function truncateContent(content, maxLength = 300) {
-            if (!content) return '';
-            if (content.length <= maxLength) return content;
-            return content.substring(0, maxLength) + '...';
+        function formatDisplayText(props) {
+            const date = getDate(props);
+            const entryType = props.entry_type ? props.entry_type.toUpperCase() : '';
+            const author = props.author || '';
+            const recipient = props.recipient || '';
+
+            let text = date;
+            if (entryType) {
+                text += ` - ${entryType}`;
+            }
+            if (author && recipient) {
+                text += ` - ${author} to ${recipient}`;
+            } else if (author) {
+                text += ` - ${author}`;
+            }
+
+            return text;
         }
 
-        // Load GeoJSON data from external file
+        function convertItalics(text) {
+            if (!text) return '';
+            // Convert _text_ to <em>text</em>
+            return text.replace(/_((?:[^_]|\\_.)+?)_/g, '<em>$1</em>');
+        }
+
+        function truncateContent(content, maxLength = 300) {
+            if (!content) return '';
+            const converted = convertItalics(content);
+            if (converted.length <= maxLength) return converted;
+            return converted.substring(0, maxLength) + '...';
+        }
+
+        function createPopupContent(props) {
+            return `<div style="color: #f0f0f0; font-size: 1em;">${formatDisplayText(props)}</div>`;
+        }
+
+        // Create map objects from features (but don't add to map yet)
+        function createMapObject(feature, index) {
+            const geom = feature.geometry;
+
+            // Skip features with null geometry
+            if (!geom || geom.type === null) {
+                return null;
+            }
+
+            const props = feature.properties;
+            const popupContent = createPopupContent(props);
+
+            if (geom.type === 'Point') {
+                // Create point marker (not added to map yet)
+                const coords = geom.coordinates;
+                const marker = L.marker([coords[1], coords[0]], { icon: activeIcon });
+                marker.bindPopup(popupContent, { maxWidth: 350 });
+
+                marker.on('click', () => {
+                    currentIndex = index;
+                    updateTimelineUI();
+                    displayContent(feature);
+                });
+
+                return { type: 'marker', layer: marker, decorator: null };
+
+            } else if (geom.type === 'LineString') {
+                // Create polyline with ant path animation (not added to map yet)
+                const coords = geom.coordinates.map(c => [c[1], c[0]]);
+                const line = L.polyline(coords, {
+                    color: '#c41e3a',
+                    weight: 4,
+                    opacity: 1,
+                    className: 'ant-path-line-active'
+                });
+
+                line.bindPopup(popupContent, { maxWidth: 350 });
+
+                // Add arrow decorators
+                const decorator = L.polylineDecorator(line, {
+                    patterns: [
+                        {
+                            offset: '100%',
+                            repeat: 0,
+                            symbol: L.Symbol.arrowHead({
+                                pixelSize: 15,
+                                polygon: false,
+                                pathOptions: {
+                                    stroke: true,
+                                    color: '#c41e3a',
+                                    weight: 3
+                                }
+                            })
+                        },
+                        {
+                            offset: '50%',
+                            repeat: 0,
+                            symbol: L.Symbol.arrowHead({
+                                pixelSize: 12,
+                                polygon: false,
+                                pathOptions: {
+                                    stroke: true,
+                                    color: '#c41e3a',
+                                    weight: 2
+                                }
+                            })
+                        }
+                    ]
+                });
+
+                line.on('click', () => {
+                    currentIndex = index;
+                    updateTimelineUI();
+                    displayContent(feature);
+                });
+
+                return { type: 'line', layer: line, decorator: decorator };
+            }
+
+            return null;
+        }
+
+        // Load GeoJSON data
         fetch('data/dracula_part1.geojson')
             .then(response => response.json())
             .then(data => {
-                // Sort features by sequence_in_book
-                features = [...data.features].sort((a, b) =>
-                    (a.properties.sequence_in_book || 0) - (b.properties.sequence_in_book || 0)
-                );
+                // Sort features by date_normalized, then by sequence_in_book
+                features = [...data.features].sort((a, b) => {
+                    const dateA = a.properties.date_normalized || '';
+                    const dateB = b.properties.date_normalized || '';
 
-                // Create markers for all features
+                    if (dateA !== dateB) {
+                        return dateA.localeCompare(dateB);
+                    }
+
+                    return (a.properties.sequence_in_book || 0) - (b.properties.sequence_in_book || 0);
+                });
+
+                // Create map objects for all features (keep indices aligned with features array)
                 features.forEach((feature, index) => {
-                    const coords = feature.geometry.coordinates;
-                    const props = feature.properties;
-
-                    const marker = L.marker([coords[1], coords[0]], { icon: draculaIcon }).addTo(map);
-
-                    const popupContent = `
-                        <div class="popup-title">${getTitle(props)}</div>
-                        <div class="popup-date">${getDate(props)}</div>
-                        <div class="popup-content">${truncateContent(props.content)}</div>
-                    `;
-
-                    marker.bindPopup(popupContent, { maxWidth: 350 });
-
-                    marker.on('click', () => {
-                        currentIndex = index;
-                        updateTimelineUI();
-                        displayContent(feature);
-                    });
-
-                    markers.push(marker);
+                    const obj = createMapObject(feature, index);
+                    // Always push to keep array indices aligned, even if null
+                    mapObjects.push(obj);
                 });
 
                 // Set up the timeline slider
@@ -335,37 +449,6 @@
             }
         });
 
-        document.getElementById('play-btn').addEventListener('click', () => {
-            if (isPlaying) {
-                stopPlayback();
-            } else {
-                startPlayback();
-            }
-        });
-
-        function startPlayback() {
-            isPlaying = true;
-            document.getElementById('play-btn').textContent = '⏸ Pause';
-            playInterval = setInterval(() => {
-                if (currentIndex < features.length - 1) {
-                    currentIndex++;
-                    updateTimelineUI();
-                    displayContent(features[currentIndex]);
-                } else {
-                    stopPlayback();
-                }
-            }, 3000);
-        }
-
-        function stopPlayback() {
-            isPlaying = false;
-            document.getElementById('play-btn').textContent = '▶ Play';
-            if (playInterval) {
-                clearInterval(playInterval);
-                playInterval = null;
-            }
-        }
-
         function updateTimelineUI() {
             if (features.length === 0) return;
 
@@ -375,31 +458,52 @@
             document.getElementById('prev-btn').disabled = currentIndex === 0;
             document.getElementById('next-btn').disabled = currentIndex === features.length - 1;
 
-            // Update marker icons
-            markers.forEach((marker, index) => {
-                if (index === currentIndex) {
-                    marker.setIcon(activeIcon);
-                } else {
-                    marker.setIcon(draculaIcon);
+            // Remove all map objects from map
+            mapObjects.forEach((obj) => {
+                if (obj && map.hasLayer(obj.layer)) {
+                    map.removeLayer(obj.layer);
+                }
+                if (obj && obj.decorator && map.hasLayer(obj.decorator)) {
+                    map.removeLayer(obj.decorator);
                 }
             });
 
-            // Pan to current marker
-            const coords = features[currentIndex].geometry.coordinates;
-            map.flyTo([coords[1], coords[0]], 6, { duration: 1 });
+            // Add only the current map object to map (if it exists and is not null)
+            const currentObj = mapObjects[currentIndex];
+            if (currentObj && currentObj !== null) {
+                currentObj.layer.addTo(map);
+                if (currentObj.decorator) {
+                    currentObj.decorator.addTo(map);
+                }
+
+                // Pan to current feature only if geometry exists
+                const feature = features[currentIndex];
+                const geom = feature.geometry;
+
+                if (geom && geom.type === 'Point') {
+                    const coords = geom.coordinates;
+                    map.flyTo([coords[1], coords[0]], 6, { duration: 1 });
+                } else if (geom && geom.type === 'LineString') {
+                    const bounds = currentObj.layer.getBounds();
+                    map.flyToBounds(bounds, { duration: 1, padding: [50, 50] });
+                }
+            }
         }
 
         function displayContent(feature) {
             const props = feature.properties;
-            const title = getTitle(props);
-            const date = getDate(props);
+            const displayText = formatDisplayText(props);
 
-            document.getElementById('current-date').textContent = date ? `${date} - ${title}` : title;
-            document.getElementById('content-text').textContent = props.content || 'No content available.';
+            document.getElementById('current-date').textContent = displayText;
 
-            // Open popup on the marker
-            if (markers[currentIndex]) {
-                markers[currentIndex].openPopup();
+            // Use innerHTML to support italics formatting
+            const contentElement = document.getElementById('content-text');
+            const content = props.content || 'No content available.';
+            contentElement.innerHTML = convertItalics(content);
+
+            // Open popup on the current map object (if it exists and has geometry)
+            if (mapObjects[currentIndex] && feature.geometry) {
+                mapObjects[currentIndex].layer.openPopup();
             }
         }
     </script>
