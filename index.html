@@ -56,7 +56,7 @@
             background-color: #2a2a2a;
             padding: 20px;
             border-top: 2px solid #8b0000;
-            max-height: 200px;
+            max-height: 400px;
             overflow-y: auto;
         }
 
@@ -208,7 +208,6 @@
         </div>
 
         <div id="content-panel">
-            <h3>Entry Content</h3>
             <div id="content-text">Select an entry from the timeline to view its content.</div>
         </div>
     </div>
@@ -224,9 +223,9 @@
         // Initialize map
         const map = L.map('map').setView([48.0, 15.0], 4);
 
-        // Add tile layer
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        // Add dark tile layer
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
             maxZoom: 19
         }).addTo(map);
 
@@ -268,10 +267,36 @@
             return props.date_normalized || props.date_raw || '';
         }
 
+        function formatDisplayText(props) {
+            const date = getDate(props);
+            const entryType = props.entry_type ? props.entry_type.toUpperCase() : '';
+            const author = props.author || '';
+            const recipient = props.recipient || '';
+
+            let text = date;
+            if (entryType) {
+                text += ` - ${entryType}`;
+            }
+            if (author && recipient) {
+                text += ` - ${author} to ${recipient}`;
+            } else if (author) {
+                text += ` - ${author}`;
+            }
+
+            return text;
+        }
+
+        function convertItalics(text) {
+            if (!text) return '';
+            // Convert _text_ to <em>text</em>
+            return text.replace(/_((?:[^_]|\\_.)+?)_/g, '<em>$1</em>');
+        }
+
         function truncateContent(content, maxLength = 300) {
             if (!content) return '';
-            if (content.length <= maxLength) return content;
-            return content.substring(0, maxLength) + '...';
+            const converted = convertItalics(content);
+            if (converted.length <= maxLength) return converted;
+            return converted.substring(0, maxLength) + '...';
         }
 
         function createPopupContent(props) {
@@ -282,16 +307,16 @@
             `;
         }
 
-        // Create map objects from features
+        // Create map objects from features (but don't add to map yet)
         function createMapObject(feature, index) {
             const geom = feature.geometry;
             const props = feature.properties;
             const popupContent = createPopupContent(props);
 
             if (geom.type === 'Point') {
-                // Create point marker
+                // Create point marker (not added to map yet)
                 const coords = geom.coordinates;
-                const marker = L.marker([coords[1], coords[0]], { icon: draculaIcon }).addTo(map);
+                const marker = L.marker([coords[1], coords[0]], { icon: activeIcon });
                 marker.bindPopup(popupContent, { maxWidth: 350 });
 
                 marker.on('click', () => {
@@ -303,14 +328,14 @@
                 return { type: 'marker', layer: marker, decorator: null };
 
             } else if (geom.type === 'LineString') {
-                // Create polyline with ant path animation
+                // Create polyline with ant path animation (not added to map yet)
                 const coords = geom.coordinates.map(c => [c[1], c[0]]);
                 const line = L.polyline(coords, {
-                    color: '#8b0000',
-                    weight: 3,
-                    opacity: 0.7,
-                    className: 'ant-path-line'
-                }).addTo(map);
+                    color: '#c41e3a',
+                    weight: 4,
+                    opacity: 1,
+                    className: 'ant-path-line-active'
+                });
 
                 line.bindPopup(popupContent, { maxWidth: 350 });
 
@@ -344,7 +369,7 @@
                             })
                         }
                     ]
-                }).addTo(map);
+                });
 
                 line.on('click', () => {
                     currentIndex = index;
@@ -432,31 +457,24 @@
             document.getElementById('prev-btn').disabled = currentIndex === 0;
             document.getElementById('next-btn').disabled = currentIndex === features.length - 1;
 
-            // Update visual styling of map objects
-            mapObjects.forEach((obj, index) => {
-                if (obj.type === 'marker') {
-                    obj.layer.setIcon(index === currentIndex ? activeIcon : draculaIcon);
-                } else if (obj.type === 'line') {
-                    const isActive = index === currentIndex;
-                    const currentClass = obj.layer.options.className;
-
-                    if (isActive && !currentClass.includes('active')) {
-                        obj.layer.setStyle({
-                            color: '#c41e3a',
-                            weight: 4,
-                            opacity: 1,
-                            className: 'ant-path-line-active'
-                        });
-                    } else if (!isActive && currentClass.includes('active')) {
-                        obj.layer.setStyle({
-                            color: '#8b0000',
-                            weight: 3,
-                            opacity: 0.7,
-                            className: 'ant-path-line'
-                        });
-                    }
+            // Remove all map objects from map
+            mapObjects.forEach((obj) => {
+                if (map.hasLayer(obj.layer)) {
+                    map.removeLayer(obj.layer);
+                }
+                if (obj.decorator && map.hasLayer(obj.decorator)) {
+                    map.removeLayer(obj.decorator);
                 }
             });
+
+            // Add only the current map object to map
+            const currentObj = mapObjects[currentIndex];
+            if (currentObj) {
+                currentObj.layer.addTo(map);
+                if (currentObj.decorator) {
+                    currentObj.decorator.addTo(map);
+                }
+            }
 
             // Pan to current feature
             const feature = features[currentIndex];
@@ -466,18 +484,21 @@
                 const coords = geom.coordinates;
                 map.flyTo([coords[1], coords[0]], 6, { duration: 1 });
             } else if (geom.type === 'LineString') {
-                const bounds = mapObjects[currentIndex].layer.getBounds();
+                const bounds = currentObj.layer.getBounds();
                 map.flyToBounds(bounds, { duration: 1, padding: [50, 50] });
             }
         }
 
         function displayContent(feature) {
             const props = feature.properties;
-            const title = getTitle(props);
-            const date = getDate(props);
+            const displayText = formatDisplayText(props);
 
-            document.getElementById('current-date').textContent = date ? `${date} - ${title}` : title;
-            document.getElementById('content-text').textContent = props.content || 'No content available.';
+            document.getElementById('current-date').textContent = displayText;
+
+            // Use innerHTML to support italics formatting
+            const contentElement = document.getElementById('content-text');
+            const content = props.content || 'No content available.';
+            contentElement.innerHTML = convertItalics(content);
 
             // Open popup on the current map object
             if (mapObjects[currentIndex]) {
